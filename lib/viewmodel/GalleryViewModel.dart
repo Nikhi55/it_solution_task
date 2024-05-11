@@ -13,28 +13,27 @@ class GalleryViewModel extends ChangeNotifier {
   String? get searchQuery => _searchQuery;
   set searchQuery(String? value) {
     _searchQuery = value;
-    loadImages();
+    loadImages(searchQuery);
     notifyListeners();
   }
 
   GalleryViewModel() {
-    loadImages();
+    loadImages(searchQuery ?? "");
     scrollController.addListener(scrollListener);
   }
 
   void scrollListener() {
     if (scrollController.position.pixels ==
         scrollController.position.maxScrollExtent) {
-      loadImages();
+      loadImages(searchQuery ?? "");
     }
   }
 
-  Future<void> loadImages() async {
+  Future<void> loadImages(String? query) async {
     if (loading) return;
     loading = true;
     notifyListeners();
     const String apiKey = "43824144-7331750bccbd4a4cc144c8a5b";
-    final String query = searchQuery ?? "";
     final String url =
         "https://pixabay.com/api/?key=$apiKey&q=$query&image_type=photo";
     final response = await http.get(Uri.parse(url));

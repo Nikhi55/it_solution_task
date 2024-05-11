@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:it_solution_task/screens/fullscreen.dart';
 import 'package:it_solution_task/viewmodel/GalleryViewModel.dart';
 import 'package:provider/provider.dart';
@@ -18,16 +15,17 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<GalleryViewModel>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: TextField(
-          controller: Provider.of<GalleryViewModel>(context).searchController,
+          controller: provider.searchController,
           onChanged: (value) {
+            provider.images.clear();
             setState(() {
-              value = Provider.of<GalleryViewModel>(context, listen: false)
-                  .searchQuery
-                  .toString();
+              provider.searchQuery = value;
             });
+            provider.loadImages(value);
           },
           decoration: InputDecoration(
             hintText: 'Search images...',
@@ -35,11 +33,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
             suffixIcon: IconButton(
               icon: Icon(Icons.clear),
               onPressed: () {
-                Provider.of<GalleryViewModel>(context, listen: false)
-                    .searchQuery = '';
-                Provider.of<GalleryViewModel>(context, listen: false)
-                    .searchController
-                    .clear();
+                provider.searchQuery = '';
+                provider.searchController.clear();
               },
             ),
           ),
@@ -47,7 +42,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
       ),
       body: Consumer<GalleryViewModel>(
         builder: (context, model, _) => model.loading
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
             : GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: MediaQuery.of(context).size.width ~/ 200,
